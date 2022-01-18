@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button } from "./styles";
+import Button from "../../primitives/button";
 
 function Counter({ initialCount, step }) {
   const [counter, setCounter] = React.useState(initialCount);
