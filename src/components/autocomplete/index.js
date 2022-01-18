@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-import { debounceFn } from "../../utils";
+import { useDebouncedCallback } from "../../hooks/useDebouncedCallback";
 import Input from "../../primitives/input";
 import Spinner from "../../primitives/spinner";
 import {
@@ -8,6 +8,7 @@ import {
   InputWrapper,
   List,
   ListItem,
+  Error,
   SpinnerWrapper,
 } from "./styles";
 
@@ -19,37 +20,40 @@ function AutoComplete() {
   const [loading, setLoading] = React.useState(false);
   const [results, setResults] = React.useState([]);
 
-  async function getCountries() {
+  async function getCountries(e) {
     try {
+      setError(null);
       setLoading(true);
-      const { data } = await axios.get(`${COUNTRIES_API_URL}/name/Italy`);
+      const { data } = await axios.get(
+        `${COUNTRIES_API_URL}/name/${e.target.value}`
+      );
       setResults(data);
       setLoading(false);
-
-      console.log("data");
     } catch (error) {
       if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
         setError(error.response.data?.message);
+        console.error(error.response);
       } else if (error.request) {
         // The request was made but no response was received
         // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
         // http.ClientRequest in node.js
-        setError(error.request);
+        console.error(error.request);
+        setError(error.request.statusText);
       } else {
         // Something happened in setting up the request that triggered an Error
-        console.log("Error", error.message);
         setError(error.message);
+        console.error(error.message);
       }
 
       setLoading(false);
     }
   }
 
-  const debouncedChangeHandler = React.useCallback(
-    debounceFn(getCountries, DEBOUNCE_DELAY),
-    []
+  const debouncedChangeHandler = useDebouncedCallback(
+    (event) => getCountries(event),
+    DEBOUNCE_DELAY
   );
 
   return (
@@ -58,7 +62,7 @@ function AutoComplete() {
         <Input
           type="text"
           className="input"
-          onChange={debouncedChangeHandler}
+          onChange={(e) => debouncedChangeHandler(e)}
         />
         {loading && (
           <SpinnerWrapper>
@@ -67,11 +71,15 @@ function AutoComplete() {
         )}
       </InputWrapper>
       {error && <Error>{error}</Error>}
-      <List>
-        {results?.map((item, index) => (
-          <ListItem key={index}>{item.name.common}</ListItem>
-        ))}
-      </List>
+      {!loading && !error && (
+        <>
+          <List>
+            {results?.map((item, index) => (
+              <ListItem key={index}>{item.name.common}</ListItem>
+            ))}
+          </List>
+        </>
+      )}
     </Wrapper>
   );
 }
