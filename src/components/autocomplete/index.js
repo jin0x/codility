@@ -2,13 +2,13 @@ import React from "react";
 import axios from "axios";
 import { debounceFn } from "../../utils";
 import Input from "../../primitives/input";
+import Spinner from "../../primitives/spinner";
 import {
   Wrapper,
   InputWrapper,
-  SpinnerWrapper,
-  Spinner,
   List,
   ListItem,
+  SpinnerWrapper,
 } from "./styles";
 
 const COUNTRIES_API_URL = "https://restcountries.com/v3.1/";
@@ -18,10 +18,6 @@ function AutoComplete() {
   const [error, setError] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [results, setResults] = React.useState([]);
-
-  React.useEffect(() => {
-    getCountries();
-  }, []);
 
   async function getCountries() {
     try {

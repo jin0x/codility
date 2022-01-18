@@ -15,8 +15,6 @@ export const SpinnerWrapper = styled.div`
   top: 0;
 `;
 
-export const Spinner = styled(ClipLoader)``;
-
 export const List = styled.ul``;
 
 export const ListItem = styled.li`
